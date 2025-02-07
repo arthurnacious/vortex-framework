@@ -2,6 +2,7 @@
 
 namespace App\Users;
 
+use App\Middleware\AuthMiddleware;
 use Framework\Module\BaseModule;
 use App\Users\Controllers\UserController;
 use App\Users\Services\UserService;
@@ -25,7 +26,7 @@ class UsersModule extends BaseModule
     public function getMiddleware(): array
     {
         return [
-            'auth' => Middleware\AuthMiddleware::class
+            AuthMiddleware::class
         ];
     }
 }

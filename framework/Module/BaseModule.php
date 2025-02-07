@@ -19,6 +19,11 @@ abstract class BaseModule
         foreach ($this->getControllers() as $controller) {
             $container->resolve($controller);
         }
+
+        // Register middleware
+        foreach ($this->getMiddleware() as $key => $middleware) {
+            $container->resolve($middleware);
+        }
     }
 
     /**
