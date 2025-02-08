@@ -1,0 +1,36 @@
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Framework\Container\Container;
+
+$commands = [
+    'serve' => function () {
+        $host = '127.0.0.1';
+        $port = 8000;
+        echo "Starting development server at http://$host:$port\n";
+        exec("php -S $host:$port -t public");
+    },
+    'clear-cache' => function () {
+        echo "Clearing cache...\n";
+        // Add logic to clear cache
+    },
+    'migrate' => function () {
+        echo "Running migrations...\n";
+        // Add migration logic
+    },
+    'help' => function () use ($commands) {
+        echo "Available commands:\n";
+        foreach (array_keys($commands) as $command) {
+            echo "  - $command\n";
+        }
+    }
+];
+
+$command = $argv[1] ?? 'help';
+
+if (isset($commands[$command])) {
+    $commands[$command]();
+} else {
+    echo "Command not found. Use 'php please help' for available commands.\n";
+}
