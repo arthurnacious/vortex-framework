@@ -8,9 +8,9 @@ use App\Users\DTO\CreateUserDTO;
 class UserService
 {
     private array $users = [
-        [1, 'John Doe', 'john@example.com', 'password'],
-        [2, 'Jane Doe', 'jane@example.com', 'password'],
-        [3, 'Bob Smith', 'bob@example.com', 'password'],
+        ['id' => 1, 'name' =>'John Doe', 'email' => 'john@example.com', 'password' => 'password'],
+        ['id' => 2, 'name' =>'Jane Doe', 'email' => 'jane@example.com', 'password' => 'password'],
+        ['id' => 3, 'name' =>'Bob Smith', 'email' => 'bob@example.com', 'password' => 'password'],
     ];
 
     public function getAllUsers(): array
@@ -22,5 +22,13 @@ class UserService
     {
         array_push($this->users, $dto);
         return $$this->users;
+    }
+
+    public function getUserById(int $id): ?array
+    {
+        $user = array_filter($this->users, fn($user) => $user['id'] === $id);
+        $user = array_values($user);
+        
+        return $user[0] ?? null;
     }
 }

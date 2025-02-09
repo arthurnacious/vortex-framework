@@ -34,7 +34,7 @@ class Router {
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             $httpMethods = [
                 'GET' => Get::class, 
-                'Patch' => Patch::class, 
+                'PATCH' => Patch::class, 
                 'PUT' => Put::class, 
                 'POST' => Post::class, 
                 'DELETE' => Delete::class
@@ -42,26 +42,30 @@ class Router {
 
             foreach ($httpMethods as $methodName => $attributeClass) {
                 $attributes = $method->getAttributes($attributeClass);
+
                 if (empty($attributes)) continue;
 
                 $path = $attributes[0]->getArguments()[0] ?? '/';
-                $fullPath = $controllerPath . $path;
-
-                $this->routes[$methodName][$fullPath] = [
+                $fullPath = rtrim($controllerPath . $path, '/'); // Remove trailing slash
+                
+                // Convert `{param}` placeholders to regex
+                $regexPath = preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $fullPath);
+                
+                $this->routes[$methodName][] = [
+                    'pattern' => "@^" . $regexPath . "$@",
                     'controller' => $controllerClass,
-                    'method' => $method->getName()
+                    'method' => $method->getName(),
+                    'params' => []
                 ];
             }
         }
     }
 
     public function dispatch(): void {
-        // Scan registered models for BaseModule classes
         foreach ($this->container->getModules() as $definition) {
             $moduleClass = is_object($definition) ? get_class($definition) : $definition;
 
             if (is_subclass_of($moduleClass, BaseModule::class)) {
-                
                 $module = new $moduleClass();
                 foreach ($module->getControllers() as $controller) {
                     $this->registerController($controller);
@@ -69,17 +73,23 @@ class Router {
             }
         }
 
-        $method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD']; //IF WE ARE USING JUST A NORMAL FORM, WITHOUT ANY HTTP VERBS, WE NEED TO USE _POST
-        $uri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') . '/'; //ALWAYS APPEND A SLASH TO THE URI
-        
-        if (isset($this->routes[$method][$uri])) {
-            $route = $this->routes[$method][$uri];
-            $controller = $this->container->resolve($route['controller']);
-            $response = $controller->{$route['method']}();
-            
-            header('Content-Type: application/json');
-            echo json_encode($response);
-            return;
+        $method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'];
+        $uri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+
+        // Match routes
+        if (isset($this->routes[$method])) {
+            foreach ($this->routes[$method] as $route) {
+                if (preg_match($route['pattern'], $uri, $matches)) {
+                    $controller = $this->container->resolve($route['controller']);
+                    $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY); // Extract named params
+                    
+                    $response = call_user_func_array([$controller, $route['method']], $params);
+                    
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    return;
+                }
+            }
         }
 
         header("HTTP/1.0 404 Not Found");

@@ -2,8 +2,6 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Framework\Container\Container;
-
 $commands = [
     'serve' => function () {
         $host = '127.0.0.1';
@@ -19,11 +17,14 @@ $commands = [
         echo "Running migrations...\n";
         // Add migration logic
     },
-    'help' => function () use ($commands) {
+    'help' => function (){
         echo "Available commands:\n";
-        foreach (array_keys($commands) as $command) {
-            echo "  - $command\n";
-        }
+        // foreach (array_keys($commands) as $command) {
+        //     echo "  - $command\n";
+        // }
+    },
+    'list:routes' => function () {        
+        require_once __DIR__ . '/framework/Please/List.php';
     }
 ];
 
