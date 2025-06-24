@@ -5,11 +5,16 @@
   "require": {
     "php": "^8.2",
     "psr/container": "^2.0",
-    "symfony/http-foundation": "^6.0"
+    "symfony/http-foundation": "^6.0",
+    "symfony/routing": "^7.3",
+    "doctrine/annotations": "^2.0",
+    "symfony/cache": "^7.3",
+    "nikic/fast-route": "^1.3"
   },
   "autoload": {
     "psr-4": {
-      "V8\\": "src/"
+      "V8\\": "src/",
+      "V8\\Modules\\": "src/Modules/"
     }
   },
   "prefer-stable": true

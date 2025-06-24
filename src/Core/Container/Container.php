@@ -13,18 +13,32 @@ class Container implements ContainerInterface
     public function get(string $id): mixed
     {
         if (!$this->has($id)) {
+            // Try to autoload and instantiate the class if it exists
+            if (class_exists($id)) {
+                return new $id();
+            }
             throw new Exception("Binding not found: {$id}");
         }
 
-        if (isset($this->instances[$id])) {
+        // Handle singleton bindings
+        if (isset($this->instances[$id]) && $this->instances[$id] !== null) {
             return $this->instances[$id];
         }
 
-        $concrete = $this->bindings[$id];
+        $concrete = $this->bindings[$id] ?? $id;
 
-        return is_callable($concrete)
-            ? $concrete($this)
-            : new $concrete();
+        if (is_callable($concrete)) {
+            $object = $concrete($this);
+        } else {
+            $object = new $concrete();
+        }
+
+        // Store singleton instances
+        if (array_key_exists($id, $this->instances)) {
+            $this->instances[$id] = $object;
+        }
+
+        return $object;
     }
 
     public function has(string $id): bool

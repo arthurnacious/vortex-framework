@@ -30,17 +30,28 @@ class Application
 
     private function registerCoreBindings(): void
     {
-        // Bind Request with factory closure
-        $this->container->singleton(Request::class, fn() => Request::createFromGlobals());
+        // Bind the Router with container reference
+        $this->container->singleton(Router::class, function () {
+            return new Router($this->container);
+        });
 
-        // Bind Response to itself (auto-instantiate)
-        $this->container->singleton(Response::class, Response::class);
+        $this->container->singleton(Request::class, fn() => Request::createFromGlobals());
+        $this->container->singleton(Response::class);
+    }
+
+    public function registerModules(array $modules): void
+    {
+        foreach ($modules as $moduleClass) {
+            $module = new $moduleClass($this->container);
+            $module->register();
+        }
     }
 
     public function run(): void
     {
-        $response = $this->container->get(Response::class);
-        $response->setContent("V8 Framework Running!");
+        $request = $this->container->get(Request::class);
+        $router = $this->container->get(Router::class);
+        $response = $router->dispatch($request);
         $response->send();
     }
 
