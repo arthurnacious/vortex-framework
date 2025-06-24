@@ -1,0 +1,6 @@
+{
+    "name": "v8/core",
+    "type": "project",
+    "minimum-stability": "dev",
+    "require": {}
+}
