@@ -1,0 +1,13 @@
+/node_modules
+
+# enviroment files
+.env
+!.env.example
+
+# composer
+vendor
+composer.lock
+
+# ide
+.idea
+.vscode

@@ -1,6 +1,16 @@
 {
-    "name": "v8/core",
-    "type": "project",
-    "minimum-stability": "dev",
-    "require": {}
+  "name": "v8/core",
+  "type": "project",
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^8.2",
+    "psr/container": "^2.0",
+    "symfony/http-foundation": "^6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "V8\\": "src/"
+    }
+  },
+  "prefer-stable": true
 }
