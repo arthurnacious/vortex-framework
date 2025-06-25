@@ -7,17 +7,18 @@ use V8\Core\Attributes\Route;
 use V8\Core\Attributes\HttpMethod;
 use Symfony\Component\HttpFoundation\Response;
 use V8\Core\Attributes\Path;
+use V8\Core\Controller\BaseController;
 use V8\Modules\Hello\services\HelloService;
 
 #[Route('/hello')]
-class HelloController
+class HelloController extends BaseController
 {
     public function __construct(private HelloService $helloService) {}
 
     #[Path('/')]
-    public function index(Request $request): Response
+    public function index(Request $request): String
     {
-        return new Response($this->helloService->hello());
+        return $this->helloService->hello();
     }
 
     #[Path('/{name}', method: 'GET')]

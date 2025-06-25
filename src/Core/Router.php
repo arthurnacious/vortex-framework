@@ -118,10 +118,30 @@ class Router
                 }
             }
 
-            return $method->invokeArgs($controller, $args);
+            $result = $method->invokeArgs($controller, $args);
+
+            // Auto-convert non-Response returns
+            if (!$result instanceof Response) {
+                return $this->normalizeResponse($result);
+            }
+            return $result;
         } catch (\Throwable $e) {
             return new Response('Server Error: ' . $e->getMessage(), 500);
         }
+    }
+
+    private function normalizeResponse(mixed $data): Response
+    {
+        return match (true) {
+            is_array($data) || is_object($data) => new Response(
+                json_encode($data),
+                Response::HTTP_OK,
+                ['Content-Type' => 'application/json']
+            ),
+            is_scalar($data) => new Response((string)$data),
+            $data === null   => new Response('', Response::HTTP_NO_CONTENT),
+            default => throw new \RuntimeException('Unsupported return type')
+        };
     }
 
     private function castParameter($value, ?\ReflectionType $type)
