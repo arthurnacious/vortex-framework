@@ -103,6 +103,11 @@ class Router
 
             $args = [];
             foreach ($method->getParameters() as $param) {
+                if (is_subclass_of($param->getType()->getName(), DataTransferObject::class)) {
+                    $args[] = $param->getType()->getName()::fromRequest($request);
+                    continue;
+                }
+
                 $paramName = $param->getName();
                 $paramType = $param->getType();
 
