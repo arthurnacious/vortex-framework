@@ -36,10 +36,18 @@ class Router
             foreach ($method->getAttributes() as $attribute) {
                 $instance = $attribute->newInstance();
 
-                if ($instance instanceof \V8\Core\Attributes\HttpMethod) {
+                if (
+                    $instance instanceof \V8\Core\Attributes\Path ||
+                    $instance instanceof \V8\Core\Attributes\HttpMethod
+                ) {
+
                     $path = ($classRoute?->path ?? '') . $instance->path;
+                    $methodName = $instance instanceof \V8\Core\Attributes\Path
+                        ? $instance->method
+                        : (new \ReflectionClass($attribute->getName()))->getShortName();
+
                     $this->routeCollector->addRoute(
-                        $instance->method,
+                        $methodName,
                         $path,
                         [$controllerClass, $method->getName()]
                     );
@@ -53,8 +61,6 @@ class Router
         $this->dispatcher = new \FastRoute\Dispatcher\GroupCountBased($this->routeCollector->getData());
 
         $path = $request->getPathInfo();
-
-        // Remove trailing slash for dynamic routes
         $path = rtrim($path, '/');
 
         $routeInfo = $this->dispatcher->dispatch(
@@ -63,19 +69,19 @@ class Router
         );
 
         return match ($routeInfo[0]) {
-            Dispatcher::NOT_FOUND => $this->handleNotFound($path),
+            Dispatcher::NOT_FOUND => $this->handleNotFound($path, $request),
             Dispatcher::METHOD_NOT_ALLOWED => new Response('Method Not Allowed', 405),
             Dispatcher::FOUND => $this->handleFoundRoute($routeInfo, $request),
             default => new Response('Server Error', 500)
         };
     }
 
-    private function handleNotFound(string $path): Response
+    private function handleNotFound(string $path, Request $request): Response
     {
         // Try again with trailing slash if not found
         $retryPath = $path . '/';
         $retryInfo = $this->dispatcher->dispatch(
-            $_SERVER['REQUEST_METHOD'] ?? 'GET',
+            $request->getMethod(),  // Use the request method instead of $_SERVER
             $retryPath
         );
 

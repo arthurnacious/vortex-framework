@@ -13,9 +13,9 @@ class Container implements ContainerInterface
     public function get(string $id): mixed
     {
         if (!$this->has($id)) {
-            // Try to autoload and instantiate the class if it exists
+            // Auto-resolve unbound classes
             if (class_exists($id)) {
-                return new $id();
+                return $this->resolveClass($id);
             }
             throw new Exception("Binding not found: {$id}");
         }
@@ -59,5 +59,43 @@ class Container implements ContainerInterface
 
         $this->bind($abstract, $concrete);
         $this->instances[$abstract] = null;
+    }
+
+    protected function resolveClass(string $class): object
+    {
+        $reflector = new \ReflectionClass($class);
+
+        // Check if class is instantiable
+        if (!$reflector->isInstantiable()) {
+            throw new Exception("Class {$class} is not instantiable");
+        }
+
+        // Get constructor parameters
+        $constructor = $reflector->getConstructor();
+        if (is_null($constructor)) {
+            return new $class();
+        }
+
+        // Resolve constructor dependencies
+        $parameters = $constructor->getParameters();
+        $dependencies = $this->resolveDependencies($parameters);
+
+        return $reflector->newInstanceArgs($dependencies);
+    }
+
+    protected function resolveDependencies(array $parameters): array
+    {
+        $dependencies = [];
+
+        foreach ($parameters as $parameter) {
+            $type = $parameter->getType();
+            if (!$type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+                throw new Exception("Cannot resolve parameter {$parameter->getName()}");
+            }
+
+            $dependencies[] = $this->get($type->getName());
+        }
+
+        return $dependencies;
     }
 }

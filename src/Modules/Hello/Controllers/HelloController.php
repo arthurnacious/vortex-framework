@@ -2,38 +2,43 @@
 
 namespace V8\Modules\Hello\Controllers;
 
+use Symfony\Component\HttpFoundation\Request;
 use V8\Core\Attributes\Route;
 use V8\Core\Attributes\HttpMethod;
 use Symfony\Component\HttpFoundation\Response;
+use V8\Core\Attributes\Path;
+use V8\Modules\Hello\services\HelloService;
 
 #[Route('/hello')]
 class HelloController
 {
-    #[HttpMethod('/')]
-    public function index(): Response
+    public function __construct(private HelloService $helloService) {}
+
+    #[Path('/')]
+    public function index(Request $request): Response
     {
-        return new Response('Hello from V8!');
+        return new Response($this->helloService->hello());
     }
 
-    #[HttpMethod('/{name}', method: HttpMethod::GET)]
+    #[Path('/{name}', method: 'GET')]
     public function greet(string $name): Response
     {
         return new Response("Hello, $name!");
     }
 
-    #[HttpMethod('/create', method: HttpMethod::POST)]
+    #[Path('/create', method: 'POST')]
     public function create(): Response
     {
         return new Response('Item created!', 201);
     }
 
-    #[HttpMethod('/{id}', method: HttpMethod::PUT)]
+    #[Path('/{id}', method: HttpMethod::PUT)]
     public function update(string $id): Response
     {
         return new Response("Item $id updated!");
     }
 
-    #[HttpMethod('/{id}', method: HttpMethod::DELETE)]
+    #[Path('/{id}', method: HttpMethod::DELETE)]
     public function delete(string $id): Response
     {
         return new Response("Item $id deleted!", 204);

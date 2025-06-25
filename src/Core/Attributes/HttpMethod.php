@@ -14,12 +14,4 @@ class HttpMethod
     public const PATCH = 'PATCH';
     public const OPTIONS = 'OPTIONS';
     public const HEAD = 'HEAD';
-
-    public function __construct(
-        public string $path,
-        public string $method = self::GET,
-        public ?string $name = null
-    ) {
-        $this->method = strtoupper($method);
-    }
 }

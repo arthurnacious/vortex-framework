@@ -17,5 +17,8 @@
       "V8\\Modules\\": "src/Modules/"
     }
   },
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "symfony/var-dumper": "^7.3"
+  }
 }
