@@ -61,7 +61,7 @@ class Router
         $this->dispatcher = new \FastRoute\Dispatcher\GroupCountBased($this->routeCollector->getData());
 
         $path = $request->getPathInfo();
-        $path = rtrim($path, '/');
+        $path = $path !== '/' ? rtrim($path, '/') : $path;
 
         $routeInfo = $this->dispatcher->dispatch(
             $request->getMethod(),

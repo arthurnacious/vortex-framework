@@ -4,7 +4,7 @@ namespace V8\Modules\Hello;
 
 use V8\Core\Module;
 use V8\Modules\Hello\Controllers\HelloController;
-use V8\Modules\Hello\services\HelloService;
+use V8\Modules\Hello\Services\HelloService;
 
 class HelloModule extends Module
 {

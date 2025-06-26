@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use V8\Core\Attributes\Path;
 use V8\Core\Controller\BaseController;
 use V8\Modules\Hello\Dtos\SayHelloDto;
-use V8\Modules\Hello\services\HelloService;
+use V8\Modules\Hello\Services\HelloService;
 
 #[Route('/hello')]
 class HelloController extends BaseController

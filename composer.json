@@ -17,11 +17,14 @@
   "autoload": {
     "psr-4": {
       "V8\\": "src/",
-      "V8\\Modules\\": "src/Modules/"
+      "V8\\Tests\\": "tests/"
     }
   },
   "prefer-stable": true,
   "require-dev": {
-    "symfony/var-dumper": "^7.3"
+    "symfony/var-dumper": "^7.3",
+    "phpunit/phpunit": "^12.2",
+    "symfony/browser-kit": "^7.3",
+    "symfony/http-client": "^7.3"
   }
 }

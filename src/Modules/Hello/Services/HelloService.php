@@ -1,6 +1,6 @@
 <?php
 
-namespace V8\Modules\Hello\services;
+namespace V8\Modules\Hello\Services;
 
 
 class HelloService

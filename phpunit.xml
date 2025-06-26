@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php"
+         colors="true"
+         stopOnFailure="false">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="APP_ENV" value="http://127.0.0.1"/>
+        <env name="SERVER_PORT" value="8000"/>
+    </php>
+    <coverage>
+        <include>
+            <directory>src</directory>
+        </include>
+    </coverage>
+</phpunit>
