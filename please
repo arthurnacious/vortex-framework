@@ -1,0 +1,16 @@
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use V8\Console\Commands\ServeCommand;
+
+// Load environment
+(new Symfony\Component\Dotenv\Dotenv())->load(__DIR__ . '/.env');
+
+$app = new Application('Vortex-8 Console', '1.0.0');
+
+// Register commands
+$app->add(new ServeCommand('serve'));
+
+$app->run();
