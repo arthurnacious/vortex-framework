@@ -34,8 +34,6 @@ my-project/
 │   └── Services/
 ├── public/
 │   └── index.php
-├── routes/
-│   └── web.php
 ├── vendor/
 ├── composer.json
 └── .env
@@ -49,10 +47,11 @@ my-project/
 
 ```php
 <?php
+namespace V8\Modules\Hello\Controllers;
 
-use V8\Routing\Route;
-use V8\Routing\Path;
-use V8\Http\BaseController;
+use V8\Core\Attributes\Route;
+use V8\Core\Attributes\Path;
+use V8\Core\Controller\BaseController;
 
 #[Route('/hello')]
 class HelloController extends BaseController
@@ -71,12 +70,13 @@ class HelloController extends BaseController
 <?php
 
 use V8\Modules\Module;
+use V8\Modules\Hello\Controllers\HelloController;
 
 class HelloModule extends Module
 {
-    public function controllers(): array
+    public function register(): void
     {
-        return [HelloController::class];
+        $this->registerRoutes([HelloController::class]);
     }
 }
 ```
@@ -86,14 +86,14 @@ class HelloModule extends Module
 ```php
 // public/index.php
 
-use V8\Kernel;
-use App\Modules\HelloModule;
+declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$kernel = new Kernel();
-$kernel->registerModule(HelloModule::class);
-$kernel->run();
+$app = new V8\Core\Application(dirname(__DIR__));
+$app->registerModules(require __DIR__ . '/../config/modules.php');
+$app->run();
+
 ```
 
 ---
@@ -130,14 +130,14 @@ class UserDto extends Dto
     public function rules(): array
     {
         return [
-            'name' => ['required', 'min:2'],
-            'email' => ['required', 'email'],
+            'name' => ['required', 'min:2'], // or 'required|min:2'
+            'email' => ['required', 'email'], // or 'required|email'
         ];
     }
 }
 ```
 
-- Invalid requests automatically return a **400 Bad Request** with validation messages.
+- Invalid requests automatically return a **422 Unprocessable Entity** with validation messages.
 
 ### 3. **Responses**
 
@@ -157,14 +157,11 @@ Each feature lives inside its own **Module**:
 ```php
 class UserModule extends Module
 {
-    public function controllers(): array
+    public function register(): void
     {
-        return [UserController::class];
-    }
+        $this->container->singleton(UserService::class, fn() => new UserService());
 
-    public function providers(): array
-    {
-        return [UserService::class];
+        $this->registerRoutes([UserController::class]);
     }
 }
 ```
