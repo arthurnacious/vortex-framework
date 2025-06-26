@@ -2,7 +2,6 @@
 
 namespace V8\Core\Exception;
 
-use Exception;
 use InvalidArgumentException;
 
 class ValidationException extends InvalidArgumentException

@@ -140,10 +140,7 @@ abstract class DataTransferObject
         }
 
         if ($errors) {
-            throw new ValidationException([
-                'message' => 'Validation failed',
-                'errors' => $errors
-            ]);
+            throw new ValidationException($errors);
         }
     }
 
