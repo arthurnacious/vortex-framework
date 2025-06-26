@@ -3,8 +3,9 @@
 namespace V8\Core\Exception;
 
 use Exception;
+use InvalidArgumentException;
 
-class ValidationException extends Exception
+class ValidationException extends InvalidArgumentException
 {
     protected array $errors;
 

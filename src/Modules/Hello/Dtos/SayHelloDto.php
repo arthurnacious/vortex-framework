@@ -20,4 +20,33 @@ class SayHelloDto extends DataTransferObject
             'isHungry' => 'in:yes,no'
         ];
     }
+
+    protected function fieldNames(): array
+    {
+        return [
+            'name' => 'Full Name',
+            'surname' => 'Last Name',
+            'birthDate' => 'Birth Date',
+            'isHungry' => 'Is Hungry'
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'name' => [
+                'required' => 'Full name is mandatory'
+            ],
+            'surname' => [
+                'required' => 'Last name is mandatory'
+            ],
+            'birthDate' => [
+                'required' => 'Birth date is mandatory',
+                'date' => 'Birth date must be a hase date ndoda',
+            ],
+            'isHungry' => [
+                'in' => 'Is hungry must be yes or no'
+            ]
+        ];
+    }
 }
