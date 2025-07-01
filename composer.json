@@ -17,7 +17,7 @@
   "autoload": {
     "psr-4": {
       "V8\\": "src/",
-      "V8\\Tests\\": "tests/"
+      "App\\": "src/"
     }
   },
   "prefer-stable": true,

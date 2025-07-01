@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use V8\Core\Attributes\Route;
 use V8\Core\Attributes\HttpMethod;
 use Symfony\Component\HttpFoundation\Response;
+use V8\Core\Attributes\Middleware;
 use V8\Core\Attributes\Path;
 use V8\Core\Controller\BaseController;
 use V8\Modules\Hello\Dtos\SayHelloDto;
@@ -19,16 +20,17 @@ class HelloController extends BaseController
     #[Path('/')]
     public function index(Request $request): String
     {
-        return $this->helloService->hello();
+        return $this->helloService->hello($request);
     }
 
-    #[Path('/{name}', method: 'GET')]
-    public function greet(string $name): Response
+    #[Path('/{name}/{surname}', method: 'GET')]
+    public function greet(string $name, string $surname): Response
     {
-        return new Response("Hello, $name!");
+        return new Response("Hello, $name $surname!");
     }
 
     #[Path('/', method: 'POST')]
+    #[Middleware(\App\Middleware\Authenticate::class)]
     public function create(SayHelloDto $dto): Response
     {
         $data = $this->helloService->great(

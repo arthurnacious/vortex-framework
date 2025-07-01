@@ -6,6 +6,7 @@ use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use V8\Core\Attributes\Middleware;
 use V8\Core\Container\Container;
 
 class Router
@@ -92,44 +93,67 @@ class Router
         return new Response('Not Found', 404);
     }
 
+
     private function handleFoundRoute(array $routeInfo, Request $request): Response
     {
         try {
             [$controllerClass, $methodName] = $routeInfo[1];
             $params = $routeInfo[2];
 
-            $controller = $this->container->get($controllerClass);
-            $method = new \ReflectionMethod($controller, $methodName);
+            // Resolve middleware stack
+            $middlewareStack = $this->resolveMiddleware($controllerClass, $methodName);
 
-            $args = [];
-            foreach ($method->getParameters() as $param) {
-                if (is_subclass_of($param->getType()->getName(), DataTransferObject::class)) {
-                    $args[] = $param->getType()->getName()::fromRequest($request);
-                    continue;
+            // Prepare controller invocation
+            $controllerInvocation = function (Request $request) use ($controllerClass, $methodName, $params) {
+                $controller = $this->container->get($controllerClass);
+                $method = new \ReflectionMethod($controller, $methodName);
+
+                $args = [];
+                foreach ($method->getParameters() as $param) {
+                    if (is_subclass_of($param->getType()->getName(), DataTransferObject::class)) {
+                        $args[] = $param->getType()->getName()::fromRequest($request);
+                        continue;
+                    }
+
+                    $paramName = $param->getName();
+                    $paramType = $param->getType();
+
+                    if (array_key_exists($paramName, $params)) {
+                        // Route parameter
+                        $args[] = $this->castParameter($params[$paramName], $paramType);
+                    } elseif ($paramType && is_a($paramType->getName(), Request::class, true)) {
+                        // Request object injection
+                        $args[] = $request;
+                    } else {
+                        // Service injection
+                        $args[] = $this->container->get($paramType->getName());
+                    }
                 }
 
-                $paramName = $param->getName();
-                $paramType = $param->getType();
+                $result = $method->invokeArgs($controller, $args);
 
-                if (array_key_exists($paramName, $params)) {
-                    // Route parameter
-                    $args[] = $this->castParameter($params[$paramName], $paramType);
-                } elseif ($paramType && is_a($paramType->getName(), Request::class, true)) {
-                    // Request object injection
-                    $args[] = $request;
-                } else {
-                    // Service injection
-                    $args[] = $this->container->get($paramType->getName());
-                }
-            }
+                return !$result instanceof Response
+                    ? $this->normalizeResponse($result)
+                    : $result;
+            };
 
-            $result = $method->invokeArgs($controller, $args);
+            // Create middleware pipeline (last middleware wraps the controller)
+            $pipeline = array_reduce(
+                array_reverse($middlewareStack),
+                function (callable $next, array $middlewareConfig) {
+                    return function (Request $request) use ($next, $middlewareConfig) {
+                        $middleware = $this->container->get($middlewareConfig['class']);
+                        return $middleware->handle(
+                            $request,
+                            $next,
+                            $middlewareConfig['params']
+                        );
+                    };
+                },
+                $controllerInvocation
+            );
 
-            // Auto-convert non-Response returns
-            if (!$result instanceof Response) {
-                return $this->normalizeResponse($result);
-            }
-            return $result;
+            return $pipeline($request);
         } catch (\Throwable $e) {
             return new Response('Server Error: ' . $e->getMessage(), 500);
         }
@@ -157,5 +181,33 @@ class Router
 
         settype($value, $type->getName());
         return $value;
+    }
+
+
+    private function resolveMiddleware(string $controllerClass, string $methodName): array
+    {
+        $middlewares = [];
+        $reflection = new \ReflectionClass($controllerClass);
+
+        // Class-level middleware
+        foreach ($reflection->getAttributes(Middleware::class) as $attr) {
+            $instance = $attr->newInstance();
+            $middlewares[] = [
+                'class' => $instance->middleware,
+                'params' => $instance->parameters
+            ];
+        }
+
+        // Method-level middleware
+        $method = $reflection->getMethod($methodName);
+        foreach ($method->getAttributes(Middleware::class) as $attr) {
+            $instance = $attr->newInstance();
+            $middlewares[] = [
+                'class' => $instance->middleware,
+                'params' => $instance->parameters
+            ];
+        }
+
+        return $middlewares;
     }
 }
