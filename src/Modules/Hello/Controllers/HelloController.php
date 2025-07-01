@@ -1,16 +1,16 @@
 <?php
 
-namespace V8\Modules\Hello\Controllers;
+namespace App\Modules\Hello\Controllers;
 
+use App\Modules\Hello\Dtos\SayHelloDto;
+use App\Modules\Hello\Services\HelloService;
 use Symfony\Component\HttpFoundation\Request;
-use V8\Core\Attributes\Route;
-use V8\Core\Attributes\HttpMethod;
+use V8\Attributes\Route;
+use V8\Attributes\HttpMethod;
 use Symfony\Component\HttpFoundation\Response;
-use V8\Core\Attributes\Middleware;
-use V8\Core\Attributes\Path;
-use V8\Core\Controller\BaseController;
-use V8\Modules\Hello\Dtos\SayHelloDto;
-use V8\Modules\Hello\Services\HelloService;
+use V8\Attributes\Middleware;
+use V8\Attributes\Path;
+use V8\Controller\BaseController;
 
 #[Route('/hello')]
 class HelloController extends BaseController

@@ -1,6 +1,6 @@
 <?php
 
-namespace V8\Core\Contracts;
+namespace V8\Contracts;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

@@ -1,6 +1,6 @@
 <?php
 
-namespace V8\Core\Exception;
+namespace V8\Exception;
 
 use InvalidArgumentException;
 

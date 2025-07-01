@@ -9,7 +9,7 @@ class RouterTest extends TestCase
 {
     public function test_resolves_basic_route()
     {
-        $router = $this->get(\V8\Core\Router::class);
+        $router = $this->get(\V8\Router::class);
         $router->registerController(\V8\Tests\Stubs\TestController::class);
 
         $request = Request::create('/test');

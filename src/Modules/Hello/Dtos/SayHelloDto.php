@@ -1,8 +1,8 @@
 <?php
 
-namespace V8\Modules\Hello\Dtos;
+namespace App\Modules\Hello\Dtos;
 
-use V8\Core\DataTransferObject;
+use V8\DataTransferObject;
 
 class SayHelloDto extends DataTransferObject
 {

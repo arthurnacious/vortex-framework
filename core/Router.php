@@ -1,13 +1,13 @@
 <?php
 
-namespace V8\Core;
+namespace V8;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use V8\Core\Attributes\Middleware;
-use V8\Core\Container\Container;
+use V8\Attributes\Middleware;
+use V8\Container\Container;
 
 class Router
 {
@@ -29,7 +29,7 @@ class Router
 
         // Get class-level route prefix
         $classRoute = null;
-        foreach ($reflection->getAttributes(\V8\Core\Attributes\Route::class) as $attribute) {
+        foreach ($reflection->getAttributes(\V8\Attributes\Route::class) as $attribute) {
             $classRoute = $attribute->newInstance();
         }
 
@@ -38,12 +38,12 @@ class Router
                 $instance = $attribute->newInstance();
 
                 if (
-                    $instance instanceof \V8\Core\Attributes\Path ||
-                    $instance instanceof \V8\Core\Attributes\HttpMethod
+                    $instance instanceof \V8\Attributes\Path ||
+                    $instance instanceof \V8\Attributes\HttpMethod
                 ) {
 
                     $path = ($classRoute?->path ?? '') . $instance->path;
-                    $methodName = $instance instanceof \V8\Core\Attributes\Path
+                    $methodName = $instance instanceof \V8\Attributes\Path
                         ? $instance->method
                         : (new \ReflectionClass($attribute->getName()))->getShortName();
 

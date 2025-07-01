@@ -1,10 +1,10 @@
 <?php
 
-namespace V8\Modules\Hello;
+namespace App\Modules\Hello;
 
-use V8\Core\Module;
-use V8\Modules\Hello\Controllers\HelloController;
-use V8\Modules\Hello\Services\HelloService;
+use App\Modules\Hello\Controllers\HelloController;
+use App\Modules\Hello\Services\HelloService;
+use V8\Module;
 
 class HelloModule extends Module
 {

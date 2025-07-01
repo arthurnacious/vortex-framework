@@ -2,7 +2,7 @@
 
 namespace V8\Tests;
 
-use V8\Core\Application;
+use V8\Application;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -13,8 +13,8 @@ abstract class TestCase extends BaseTestCase
     {
         $this->app = new Application(dirname(__DIR__));
         $this->app->getContainer()->singleton(
-            \V8\Core\Environment::class,
-            fn() => new \V8\Core\Environment()
+            \V8\Environment::class,
+            fn() => new \V8\Environment()
         );
     }
 

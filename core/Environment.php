@@ -1,6 +1,6 @@
 <?php
 
-namespace V8\Core;
+namespace V8;
 
 use Symfony\Component\Dotenv\Dotenv;
 use RuntimeException;
@@ -13,7 +13,7 @@ class Environment
     {
         if (empty(self::$config)) {
             // Load all environment config files
-            self::$config = self::loadConfigFiles($rootPath . '/config/environment');
+            self::$config = self::loadConfigFiles($rootPath . '/config');
 
             // Load .env if exists
             $dotenv = new Dotenv();

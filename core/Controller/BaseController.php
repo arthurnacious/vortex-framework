@@ -1,6 +1,6 @@
 <?php
 
-namespace V8\Core\Controller;
+namespace V8\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
 

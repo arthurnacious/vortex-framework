@@ -49,9 +49,9 @@ my-project/
 <?php
 namespace V8\Modules\Hello\Controllers;
 
-use V8\Core\Attributes\Route;
-use V8\Core\Attributes\Path;
-use V8\Core\Controller\BaseController;
+use V8\Attributes\Route;
+use V8\Attributes\Path;
+use V8\Controller\BaseController;
 
 #[Route('/hello')]
 class HelloController extends BaseController
@@ -90,7 +90,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$app = new V8\Core\Application(dirname(__DIR__));
+$app = new V8\Application(dirname(__DIR__));
 $app->registerModules(require __DIR__ . '/../config/modules.php');
 $app->run();
 

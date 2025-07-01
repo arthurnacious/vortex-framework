@@ -1,6 +1,6 @@
 <?php
 
-namespace V8\Core\Attributes;
+namespace V8\Attributes;
 
 use Attribute;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace V8\Core\Container;
+namespace V8\Container;
 
 use Psr\Container\ContainerInterface;
 use Exception;

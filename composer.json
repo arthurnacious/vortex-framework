@@ -16,7 +16,7 @@
   },
   "autoload": {
     "psr-4": {
-      "V8\\": "src/",
+      "V8\\": "core/",
       "App\\": "src/"
     }
   },

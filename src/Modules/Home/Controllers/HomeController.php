@@ -1,11 +1,11 @@
 <?php
 
-namespace V8\Modules\Home\Controllers;
+namespace App\Modules\Home\Controllers;
 
 use Symfony\Component\HttpFoundation\Response;
-use V8\Core\Attributes\Route;
-use V8\Core\Attributes\Path;
-use V8\Core\Controller\BaseController;
+use V8\Attributes\Route;
+use V8\Attributes\Path;
+use V8\Controller\BaseController;
 
 #[Route('/')]
 class HomeController extends BaseController

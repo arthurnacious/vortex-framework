@@ -4,7 +4,7 @@ namespace App\Middleware;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use V8\Core\Contracts\MiddlewareInterface;
+use V8\Contracts\MiddlewareInterface;
 
 class Authenticate implements MiddlewareInterface
 {

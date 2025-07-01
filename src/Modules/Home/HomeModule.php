@@ -1,9 +1,9 @@
 <?php
 
-namespace V8\Modules\Home;
+namespace App\Modules\Home;
 
-use V8\Core\Module;
-use V8\Modules\Home\Controllers\HomeController;
+use V8\Module;
+use App\Modules\Home\Controllers\HomeController;
 
 class HomeModule extends Module
 {

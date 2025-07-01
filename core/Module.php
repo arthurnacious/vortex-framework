@@ -1,8 +1,8 @@
 <?php
 
-namespace V8\Core;
+namespace V8;
 
-use V8\Core\Container\Container;
+use V8\Container\Container;
 
 abstract class Module
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace V8\Core;
+namespace V8;
 
 use DateTime;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
-use V8\Core\Exception\ValidationException;
+use V8\Exception\ValidationException;
 
 abstract class DataTransferObject
 {

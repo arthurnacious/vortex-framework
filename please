@@ -5,7 +5,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Symfony\Component\Console\Application;
 use V8\Console\Commands\ServeCommand;
 use V8\Console\Commands\TestCommand;
-use V8\Core\Environment;
+use V8\Environment;
 
 // Load environment
 Environment::load(__DIR__ . '/');

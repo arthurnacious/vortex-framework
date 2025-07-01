@@ -2,9 +2,9 @@
 
 namespace V8\Tests\Stubs;
 
-use V8\Core\Attributes\Route;
+use V8\Attributes\Route;
 use Symfony\Component\HttpFoundation\Response;
-use V8\Core\Attributes\Path;
+use V8\Attributes\Path;
 
 #[Route('/test')]
 class TestController
