@@ -6,6 +6,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
+use V8\Core\Environment;
 
 class ServeCommand extends Command
 {
@@ -19,18 +20,21 @@ class ServeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $config = $this->loadServerConfig();
+        $appName = Environment::get('app.name', 'My Vortex-8 App');
+        $host =  Environment::get('server.host', 'http://localhost:8000');
+        $port = Environment::get('server.port', 8000);
+        $publicDir = Environment::get('public.dir', 'public');
 
-        $output->writeln("<info>Vortex-8 development server started:</info>");
-        $output->writeln("<comment>http://{$config['host']}:{$config['port']}</comment>");
+        $output->writeln("<info>{$appName} development server started:</info>");
+        $output->writeln("<comment>http://{$host}:{$port}</comment>");
         $output->writeln("Press Ctrl+C to stop\n");
 
         $process = new Process([
             'php',
             '-S',
-            "{$config['host']}:{$config['port']}",
+            "{$host}:{$port}",
             '-t',
-            $config['public_dir']
+            $publicDir
         ]);
 
         $process->setTimeout(null);
@@ -39,16 +43,5 @@ class ServeCommand extends Command
         });
 
         return Command::SUCCESS;
-    }
-
-    protected function loadServerConfig(): array
-    {
-        $config = require __DIR__ . '/../../../config/environment/project.php';
-
-        return [
-            'host' => $_ENV['SERVER_HOST'] ?? $config['server']['host'],
-            'port' => $_ENV['SERVER_PORT'] ?? $config['server']['port'],
-            'public_dir' => $_ENV['PUBLIC_DIR'] ?? $config['server']['public_dir'],
-        ];
     }
 }

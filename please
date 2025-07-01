@@ -3,12 +3,12 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
-use Symfony\Component\Dotenv\Dotenv;
 use V8\Console\Commands\ServeCommand;
 use V8\Console\Commands\TestCommand;
+use V8\Core\Environment;
 
 // Load environment
-(new Dotenv())->load(__DIR__ . '/.env');
+Environment::load(__DIR__ . '/');
 
 $app = new Application('Vortex-8 Console', '1.0.0');
 
