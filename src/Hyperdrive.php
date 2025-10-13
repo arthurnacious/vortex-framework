@@ -4,52 +4,38 @@ declare(strict_types=1);
 
 namespace Hyperdrive;
 
+use Hyperdrive\Kernel\ApplicationKernel;
 use Hyperdrive\Http\Response;
 
 class Hyperdrive
 {
-    private float $startTime;
-    private string $engine;
+    private ApplicationKernel $kernel;
     
-    public function __construct()
+    public function __construct(string $environment = 'production')
     {
-        $this->startTime = microtime(true);
-        $this->engine = $this->detectEngine();
+        $this->kernel = new ApplicationKernel($environment);
     }
     
-    public static function boost(): string 
+    public static function boost(string $environment = 'production'): self
     {
-        return "🚀 Hyperdrive boosted!";
+        $instance = new self($environment);
+        $instance->kernel->boost();
+        return $instance;
     }
     
-    public function warp(): Response 
+    public function warp(): Response
     {
-        $responseTime = round((microtime(true) - $this->startTime) * 1000, 2);
-        
-        $data = [
-            'message' => '⚡ Warping to lightspeed...',
-            'engine' => $this->engine,
-            'response_time_ms' => $responseTime
-        ];
-        
-        return Response::json($data);
+        return $this->kernel->handle();
     }
     
-    private function detectEngine(): string
+    public function getKernel(): ApplicationKernel
     {
-        if (extension_loaded('openswoole')) {
-            return 'openswoole';
-        }
-        
-        if (extension_loaded('swoole')) {
-            return 'swoole'; 
-        }
-        
-        return 'roadster';
+        return $this->kernel;
     }
-    
+
     public function getEngine(): string
     {
-        return $this->engine;
+        return $this->kernel->getEngine();
     }
+    
 }
