@@ -15,13 +15,16 @@
     ],
     "require": {
         "php": "^8.2",
-        "openswoole/core": "^22.0",
         "psr/container": "^2.0",
         "psr/http-message": "^1.0",
         "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
         "psr/http-factory": "^1.0",
         "symfony/console": "^6.0 || ^7.0"
+    },
+    "suggest": {
+        "openswoole/core": "^22.0 for production performance",
+        "ext-openswoole": "For coroutines and high performance"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"
