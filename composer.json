@@ -1,58 +1,12 @@
 {
     "name": "hyperdrive/framework",
-    "description": "OpenSwoole-first PHP framework with declarative modules",
-    "type": "library",
-    "keywords": [
-        "php",
-        "fast",
-        "swoole",
-        "modules",
-        "framework",
-        "attributes",
-        "concurrent",
-        "coroutines",
-        "openswoole"
-    ],
+    "type": "library", 
     "require": {
-        "php": "^8.2",
-        "psr/container": "^2.0",
-        "psr/http-message": "^1.0",
-        "psr/http-server-handler": "^1.0",
-        "psr/http-server-middleware": "^1.0",
-        "psr/http-factory": "^1.0",
-        "symfony/console": "^6.0 || ^7.0"
-    },
-    "suggest": {
-        "openswoole/core": "^22.0 for production performance",
-        "ext-openswoole": "For coroutines and high performance"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^10.0"
+        "php": "^8.2"
     },
     "autoload": {
         "psr-4": {
             "Hyperdrive\\": "src/"
-        },
-        "files": [
-            "src/Support/Helpers.php",
-            "src/Support/CoroutineHelpers.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Hyperdrive\\Tests\\": "tests/"
         }
-    },
-    "scripts": {
-        "dev": "bin/hyperdrive serve --host=0.0.0.0 --port=8000",
-        "start": "bin/hyperdrive serve --host=0.0.0.0 --port=8000 --env=production",
-        "please": "bin/hyperdrive",
-        "test": "phpunit",
-        "test-coverage": "phpunit --coverage-html coverage"
-    },
-    "bin": [
-        "bin/hyperdrive"
-    ],
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    }
 }
