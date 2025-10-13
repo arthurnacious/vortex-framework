@@ -14,12 +14,13 @@ class HyperdriveTest extends TestCase
         $this->assertEquals('🚀 Hyperdrive boosted!', Hyperdrive::boost());
     }
     
-    public function test_warp_returns_string(): void 
+    public function test_warp_returns_timing_data(): void 
     {
         $hyperdrive = new Hyperdrive();
         $result = $hyperdrive->warp();
         
-        // Just test it returns a string for now
-        $this->assertIsString($result);
+        $this->assertIsArray($result);
+        $this->assertEquals('⚡ Warping to lightspeed...', $result['message']);
+        $this->assertIsFloat($result['response_time_ms']);
     }
 }
