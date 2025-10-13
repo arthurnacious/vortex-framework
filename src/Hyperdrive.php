@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Hyperdrive;
 
+use Hyperdrive\Http\Response;
+
 class Hyperdrive
 {
     private float $startTime;
@@ -20,15 +22,17 @@ class Hyperdrive
         return "🚀 Hyperdrive boosted!";
     }
     
-    public function warp(): array 
+    public function warp(): Response 
     {
         $responseTime = round((microtime(true) - $this->startTime) * 1000, 2);
         
-        return [
+        $data = [
             'message' => '⚡ Warping to lightspeed...',
             'engine' => $this->engine,
             'response_time_ms' => $responseTime
         ];
+        
+        return Response::json($data);
     }
     
     private function detectEngine(): string

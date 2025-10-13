@@ -6,17 +6,21 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 use Hyperdrive\Hyperdrive;
 
-// Start timing
-$startTime = microtime(true);
+// Start framework timing
+$frameworkStartTime = microtime(true);
 
 $hyperdrive = new Hyperdrive();
-
-// Get response
 $response = $hyperdrive->warp();
 
-// Add total framework time
-$response['framework_time_ms'] = round((microtime(true) - $startTime) * 1000, 2);
+// Add framework time to response data
+$frameworkTime = round((microtime(true) - $frameworkStartTime) * 1000, 2);
 
-// Output as JSON
-header('Content-Type: application/json; charset=utf-8');
-echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+// Get current response data and add framework time
+$responseData = $response->getData();
+$responseData['framework_time_ms'] = $frameworkTime;
+
+// Create new response with updated data
+$finalResponse = \Hyperdrive\Http\Response::json($responseData);
+
+// Send the response
+$finalResponse->send();
