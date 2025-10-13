@@ -7,10 +7,12 @@ namespace Hyperdrive;
 class Hyperdrive
 {
     private float $startTime;
+    private string $engine;
     
     public function __construct()
     {
         $this->startTime = microtime(true);
+        $this->engine = $this->detectEngine();
     }
     
     public static function boost(): string 
@@ -24,7 +26,26 @@ class Hyperdrive
         
         return [
             'message' => '⚡ Warping to lightspeed...',
+            'engine' => $this->engine,
             'response_time_ms' => $responseTime
         ];
+    }
+    
+    private function detectEngine(): string
+    {
+        if (extension_loaded('openswoole')) {
+            return 'openswoole';
+        }
+        
+        if (extension_loaded('swoole')) {
+            return 'swoole'; 
+        }
+        
+        return 'roadster';
+    }
+    
+    public function getEngine(): string
+    {
+        return $this->engine;
     }
 }
