@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Hyperdrive\Kernel;
 
 use Hyperdrive\Contracts\Kernel\KernelInterface;
+use Hyperdrive\Contracts\Container\ContainerInterface;
+use Hyperdrive\Container\Container;
 use Hyperdrive\Http\Response;
 
 class ApplicationKernel implements KernelInterface
@@ -14,12 +16,18 @@ class ApplicationKernel implements KernelInterface
     private float $requestStartTime = 0.0;
     private bool $bootstrapped = false;
     private string $engine;
+    private ContainerInterface $container;
     
     public function __construct(
         private string $environment = 'production'
     ) {
         $this->frameworkStartTime = microtime(true);
         $this->engine = $this->detectEngine();
+        $this->container = new Container();
+        
+        // Register kernel in container
+        $this->container->instance(ContainerInterface::class, $this->container);
+        $this->container->instance(KernelInterface::class, $this);
     }
     
     public function boost(): void
@@ -28,7 +36,9 @@ class ApplicationKernel implements KernelInterface
             return;
         }
         
-        // Bootstrap the kernel
+        // Register core services
+        $this->registerCoreServices();
+        
         $this->frameworkBootTime = microtime(true);
         $this->bootstrapped = true;
     }
@@ -37,15 +47,15 @@ class ApplicationKernel implements KernelInterface
     {
         $this->requestStartTime = microtime(true);
         
-        // Handle the request and generate response
         $responseTime = round((microtime(true) - $this->requestStartTime) * 1000, 2);
         
         $data = [
-            'message' => '🚀 Kernel handling request...',
+            'message' => 'Kernel handling request...',
             'environment' => $this->environment,
             'engine' => $this->engine,
             'response_time_ms' => $responseTime,
-            'boot_time_ms' => $this->getBootTimeMs()
+            'boot_time_ms' => $this->getBootTimeMs(),
+            'container_working' => true
         ];
         
         return Response::json($data);
@@ -82,6 +92,11 @@ class ApplicationKernel implements KernelInterface
         return $this->engine;
     }
     
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
+    }
+    
     private function detectEngine(): string
     {
         if (extension_loaded('openswoole')) {
@@ -93,5 +108,12 @@ class ApplicationKernel implements KernelInterface
         }
         
         return 'roadster';
+    }
+    
+    private function registerCoreServices(): void
+    {
+        // Register core framework services
+        $this->container->bind('engine', fn() => $this->engine);
+        $this->container->bind('environment', fn() => $this->environment);
     }
 }
