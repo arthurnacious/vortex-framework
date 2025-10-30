@@ -26,6 +26,7 @@ class RouteCollector
         
         // Get class-level route attribute
         $classAttributes = $reflection->getAttributes(RouteAttribute::class);
+        
         $prefix = '';
         $classMiddleware = [];
 
@@ -73,7 +74,8 @@ class RouteCollector
             foreach ($attributes as $attribute) {
                 $routeAttribute = $attribute->newInstance();
                 
-                $uri = $this->buildUri($prefix, $routeAttribute->path);
+                $uri = $this->buildUri($prefix, $routeAttribute->path);                
+                
                 $middleware = array_merge($classMiddleware, $routeAttribute->middleware);
                 
                 $this->routes[] = new Route(
@@ -108,4 +110,6 @@ class RouteCollector
         
         return '/';
     }
+
+    
 }
