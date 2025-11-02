@@ -183,7 +183,7 @@ class ApplicationKernel implements KernelInterface
             return 'swoole';
         }
 
-        return 'roadster';
+        return 'roadstar';
     }
 
     private function registerCoreServices(): void

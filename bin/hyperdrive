@@ -1,0 +1,98 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+use Hyperdrive\Server\ServerFactory;
+use Hyperdrive\Support\Env;
+
+// Load environment
+Env::load();
+
+$command = $argv[1] ?? 'serve';
+
+// Parse command line options
+$options = [];
+for ($i = 2; $i < $argc; $i++) {
+    if (str_starts_with($argv[$i], '--')) {
+        $parts = explode('=', substr($argv[$i], 2));
+        $options[$parts[0]] = $parts[1] ?? true;
+    }
+}
+
+switch ($command) {
+    case 'serve':
+        startServer($options);
+        break;
+
+    case 'server:info':
+        showServerInfo();
+        break;
+
+    case 'help':
+    case '--help':
+    case '-h':
+        showHelp();
+        break;
+
+    default:
+        echo "Unknown command: {$command}\n";
+        showHelp();
+        exit(1);
+}
+
+function startServer(array $options): void
+{
+    // Override environment with command line options
+    if (isset($options['host'])) {
+        $_ENV['HYPERDRIVE_HOST'] = $options['host'];
+    }
+
+    if (isset($options['port'])) {
+        $_ENV['HYPERDRIVE_PORT'] = $options['port'];
+    }
+
+    if (isset($options['env'])) {
+        $_ENV['HYPERDRIVE_DEBUG'] = $options['env'] === 'development' ? 'true' : 'false';
+    }
+
+    $server = ServerFactory::create();
+    $server->start();
+}
+
+function showServerInfo(): void
+{
+    $info = ServerFactory::getServerInfo();
+
+    echo "🚀 Hyperdrive Server Information:\n";
+    echo "📍 Engine: " . $info['engine'] . "\n";
+    echo "🌐 Host: " . $info['host'] . "\n";
+    echo "🔌 Port: " . $info['port'] . "\n";
+    echo "🔧 Debug: " . ($info['debug'] ? 'true' : 'false') . "\n";
+
+    if (isset($info['openswoole_version'])) {
+        echo "⚡ OpenSwoole Version: " . $info['openswoole_version'] . "\n";
+    } elseif (isset($info['swoole_version'])) {
+        echo "⚡ Swoole Version: " . $info['swoole_version'] . "\n";
+    }
+}
+
+function showHelp(): void
+{
+    echo "Hyperdrive Framework CLI\n\n";
+    echo "Usage:\n";
+    echo "  bin/hyperdrive serve          Start the server\n";
+    echo "  bin/hyperdrive server:info    Show server information\n";
+    echo "  bin/hyperdrive help           Show this help message\n\n";
+    echo "Server Options:\n";
+    echo "  --host=HOST          Server host (default: 0.0.0.0)\n";
+    echo "  --port=PORT          Server port (default: 8000)\n";
+    echo "  --env=ENVIRONMENT    Server environment (development/production)\n\n";
+    echo "Environment Variables:\n";
+    echo "  HYPERDRIVE_ENGINE    Server engine (openswoole, swoole, roadstar, auto)\n";
+    echo "  HYPERDRIVE_HOST      Server host\n";
+    echo "  HYPERDRIVE_PORT      Server port\n";
+    echo "  HYPERDRIVE_DEBUG     Debug mode (true/false)\n";
+}
