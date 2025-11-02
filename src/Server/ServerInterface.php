@@ -7,4 +7,7 @@ namespace Hyperdrive\Server;
 interface ServerInterface
 {
     public function start(): void;
+    public function stop(): void;
+    public function reload(): void;
+    public function getInfo(): array;
 }

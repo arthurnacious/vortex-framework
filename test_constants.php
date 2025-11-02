@@ -6,31 +6,31 @@ namespace Hyperdrive\Server;
 
 use Hyperdrive\Support\Env;
 use Hyperdrive\Hyperdrive;
-use Swoole\Constant;
-use Swoole\Process;
+use OpenSwoole\Constant;
+use OpenSwoole\Util;
 
-class SwooleServer implements ServerInterface
+class OpenSwooleServer implements ServerInterface
 {
-    private \Swoole\Http\Server $server;
+    private \OpenSwoole\Http\Server $server;
     private float $serverStartTime;
     private int $cores;
 
     public function start(): void
     {
         $this->serverStartTime = microtime(true);
-        $this->cores = swoole_cpu_num();
+        $this->cores = Util::getCPUNum();
 
         $host = Env::getHost();
         $port = Env::getPort();
 
-        $this->server = new \Swoole\Http\Server($host, $port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
+        $this->server = new \OpenSwoole\Http\Server($host, $port, 1, Constant::SOCK_TCP);
 
         $this->configureServer();
         $this->setupHandlers();
 
-        echo "🚀 Hyperdrive Swoole Server starting...\n";
+        echo "🚀 Hyperdrive OpenSwoole Server starting...\n";
         echo "📍 Server: http://{$host}:{$port}\n";
-        echo "⚡ Engine: Swoole " . phpversion('swoole') . "\n";
+        echo "⚡ Engine: OpenSwoole " . phpversion('openswoole') . "\n";
         echo "🔧 Mode: " . (Env::isDebug() ? 'Development' : 'Production') . "\n";
         echo "🔄 Workers: " . ($this->cores * 2) . " (CPU: " . $this->cores . ")\n";
         echo "📋 Press Ctrl+C to stop the server\n\n";
@@ -46,8 +46,8 @@ class SwooleServer implements ServerInterface
             'max_conn' => 100000,
             'enable_coroutine' => true,
             'max_coroutine' => 300000,
-            'log_file' => dirname(__DIR__, 2) . '/storage/logs/swoole.log',
-            'log_level' => Env::isDebug() ? SWOOLE_LOG_DEBUG : SWOOLE_LOG_INFO,
+            'log_file' => dirname(__DIR__, 2) . '/storage/logs/openswoole.log',
+            'log_level' => Env::isDebug() ? Constant::LOG_DEBUG : Constant::LOG_INFO,
             'enable_static_handler' => true,
             'document_root' => dirname(__DIR__, 2) . '/public',
             'static_handler_locations' => ['/css', '/js', '/images'],
@@ -65,7 +65,7 @@ class SwooleServer implements ServerInterface
     {
         $this->server->on('start', function () {
             $uptime = round(microtime(true) - $this->serverStartTime, 3);
-            echo "✅ Swoole Server started successfully ({$uptime}s)\n";
+            echo "✅ OpenSwoole Server started successfully ({$uptime}s)\n";
             echo "🔄 Worker processes: " . ($this->cores * 2) . "\n";
 
             if (Env::isDebug()) {
@@ -74,7 +74,7 @@ class SwooleServer implements ServerInterface
         });
 
         $this->server->on('shutdown', function () {
-            echo "🛑 Swoole Server stopped\n";
+            echo "🛑 OpenSwoole Server stopped\n";
         });
 
         $this->server->on('workerstart', function ($server, int $workerId) {
@@ -89,10 +89,10 @@ class SwooleServer implements ServerInterface
             }
         });
 
-        $this->server->on('request', function ($swooleRequest, $swooleResponse) {
-            $hyperdriveRequest = $this->createRequestFromSwoole($swooleRequest);
+        $this->server->on('request', function ($openSwooleRequest, $openSwooleResponse) {
+            $hyperdriveRequest = $this->createRequestFromOpenSwoole($openSwooleRequest);
             $hyperdriveResponse = $this->handleRequest($hyperdriveRequest);
-            $this->sendSwooleResponse($swooleResponse, $hyperdriveResponse);
+            $this->sendOpenSwooleResponse($openSwooleResponse, $hyperdriveResponse);
         });
 
         $this->server->on('task', function ($server, $taskId, $reactorId, $data) {
@@ -106,15 +106,15 @@ class SwooleServer implements ServerInterface
         });
     }
 
-    private function createRequestFromSwoole($swooleRequest): \Hyperdrive\Http\Request
+    private function createRequestFromOpenSwoole($openSwooleRequest): \Hyperdrive\Http\Request
     {
-        $method = $swooleRequest->server['request_method'] ?? 'GET';
-        $uri = $swooleRequest->server['request_uri'] ?? '/';
-        $headers = $swooleRequest->header ?? [];
-        $get = $swooleRequest->get ?? [];
-        $post = $swooleRequest->post ?? [];
-        $files = $swooleRequest->files ?? [];
-        $cookies = $swooleRequest->cookie ?? [];
+        $method = $openSwooleRequest->server['request_method'] ?? 'GET';
+        $uri = $openSwooleRequest->server['request_uri'] ?? '/';
+        $headers = $openSwooleRequest->header ?? [];
+        $get = $openSwooleRequest->get ?? [];
+        $post = $openSwooleRequest->post ?? [];
+        $files = $openSwooleRequest->files ?? [];
+        $cookies = $openSwooleRequest->cookie ?? [];
 
         $data = array_merge($get, $post);
         $request = new \Hyperdrive\Http\Request($method, $uri, $headers, $data, $get);
@@ -127,7 +127,7 @@ class SwooleServer implements ServerInterface
             $request->setAttribute("cookie_{$key}", $value);
         }
 
-        $request->setAttribute('coroutine_id', \Swoole\Coroutine::getCid());
+        $request->setAttribute('coroutine_id', \OpenSwoole\Coroutine::getCid());
 
         return $request;
     }
@@ -154,24 +154,24 @@ class SwooleServer implements ServerInterface
         }
     }
 
-    private function sendSwooleResponse($swooleResponse, \Hyperdrive\Http\Response $hyperdriveResponse): void
+    private function sendOpenSwooleResponse($openSwooleResponse, \Hyperdrive\Http\Response $hyperdriveResponse): void
     {
-        $swooleResponse->status($hyperdriveResponse->getStatus());
+        $openSwooleResponse->status($hyperdriveResponse->getStatus());
 
         foreach ($hyperdriveResponse->getHeaders() as $name => $value) {
-            $swooleResponse->header($name, $value);
+            $openSwooleResponse->header($name, $value);
         }
 
-        $swooleResponse->header('X-Powered-By', 'Hyperdrive/Swoole');
-        $swooleResponse->header('X-Coroutine-ID', (string)\Swoole\Coroutine::getCid());
+        $openSwooleResponse->header('X-Powered-By', 'Hyperdrive/OpenSwoole');
+        $openSwooleResponse->header('X-Coroutine-ID', (string)\OpenSwoole\Coroutine::getCid());
 
         $data = $hyperdriveResponse->getData();
 
         if (is_array($data)) {
-            $swooleResponse->header('Content-Type', 'application/json');
-            $swooleResponse->end(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $openSwooleResponse->header('Content-Type', 'application/json');
+            $openSwooleResponse->end(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         } else {
-            $swooleResponse->end((string) $data);
+            $openSwooleResponse->end((string) $data);
         }
     }
 
@@ -187,7 +187,7 @@ class SwooleServer implements ServerInterface
     public function stop(): void
     {
         if (isset($this->server)) {
-            $this->server->stop();
+            $this->server->stop(-1, true);
         }
     }
 
@@ -201,9 +201,9 @@ class SwooleServer implements ServerInterface
     public function getInfo(): array
     {
         $info = [
-            'type' => 'swoole',
-            'description' => 'Swoole coroutine server',
-            'version' => phpversion('swoole'),
+            'type' => 'openswoole',
+            'description' => 'OpenSwoole coroutine server',
+            'version' => phpversion('openswoole'),
             'host' => Env::getHost(),
             'port' => Env::getPort(),
             'workers' => $this->cores * 2,
