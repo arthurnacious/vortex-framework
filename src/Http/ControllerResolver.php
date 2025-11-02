@@ -6,10 +6,10 @@ namespace Hyperdrive\Http;
 
 use Hyperdrive\Contracts\Container\ContainerInterface;
 use Hyperdrive\Routing\Route;
+use Hyperdrive\Dto\DataTransferObject;
+use Hyperdrive\Reflection\HyperdriveReflection;
 use ReflectionClass;
 use ReflectionMethod;
-use ReflectionNamedType;
-use ReflectionUnionType;
 
 class ControllerResolver
 {
@@ -30,7 +30,7 @@ class ControllerResolver
         $controller = $this->resolveController($controllerClass, $container);
 
         // Resolve method parameters
-        $methodParameters = $this->resolveMethodParameters($controllerClass, $method, $request, $parameters);
+        $methodParameters = $this->resolveMethodParameters($controllerClass, $method, $request, $parameters, $container);
 
         // Call the controller method
         return $controller->$method(...$methodParameters);
@@ -54,8 +54,15 @@ class ControllerResolver
         foreach ($constructor->getParameters() as $parameter) {
             $type = $parameter->getType();
 
-            if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
-                $dependencies[] = $container->get($type->getName());
+            if ($type && !$type->isBuiltin()) {
+                $typeName = HyperdriveReflection::getTypeName($type);
+                if ($typeName) {
+                    $dependencies[] = $container->get($typeName);
+                } else {
+                    throw new \InvalidArgumentException(
+                        "Cannot resolve parameter \${$parameter->getName()} in {$controllerClass} constructor"
+                    );
+                }
             } elseif ($parameter->isDefaultValueAvailable()) {
                 $dependencies[] = $parameter->getDefaultValue();
             } else {
@@ -72,7 +79,8 @@ class ControllerResolver
         string $controllerClass,
         string $method,
         Request $request,
-        array $routeParameters
+        array $routeParameters,
+        ContainerInterface $container
     ): array {
         $reflection = new ReflectionMethod($controllerClass, $method);
         $parameters = [];
@@ -80,10 +88,17 @@ class ControllerResolver
         foreach ($reflection->getParameters() as $parameter) {
             $paramName = $parameter->getName();
             $paramType = $parameter->getType();
+            $typeName = $paramType ? HyperdriveReflection::getTypeName($paramType) : null;
 
             // Inject Request object
-            if ($paramType instanceof ReflectionNamedType && $paramType->getName() === Request::class) {
+            if ($typeName === Request::class) {
                 $parameters[] = $request;
+                continue;
+            }
+
+            // Inject DTO objects
+            if ($typeName && is_subclass_of($typeName, DataTransferObject::class)) {
+                $parameters[] = $typeName::fromRequest($request);
                 continue;
             }
 
@@ -109,11 +124,11 @@ class ControllerResolver
 
     private function convertParameterType(mixed $value, ?\ReflectionType $type): mixed
     {
-        if (!$type instanceof ReflectionNamedType) {
+        if ($type === null) {
             return $value;
         }
 
-        $typeName = $type->getName();
+        $typeName = HyperdriveReflection::getTypeName($type);
 
         return match ($typeName) {
             'int' => (int) $value,
